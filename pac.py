@@ -3,16 +3,13 @@
 HTTP = []
 HTTPS = []
 
-with open('proxy.txt' , 'r') as f:
-    while True:
-        staff = f.readline()[:-1]
-        if not staff:
-            break
-        (proxy , protocol) = staff.split('@')
-        if protocol == 'http':
-            HTTP.append(proxy)
-        elif protocol == 'https':
-            HTTPS.append(proxy)
+with open('proxy.json' , 'r') as f:
+    proxies = eval(f.read())
+    for proxy in proxies:
+        if proxy['protocol'] == 'HTTP':
+            HTTP.append(proxy['ip'] + ':' + proxy['port'])
+        elif proxy['protocol']  == 'HTTPS':
+            HTTPS.append(proxy['ip'] + ':' + proxy['port'])
 
 with open('pac.pac' , 'w') as f:
     f.write(r'''function FindProxyForURL(url , host)

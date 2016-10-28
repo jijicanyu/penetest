@@ -8,21 +8,19 @@ import urllib.request
 
 def change_proxy(proxy = None):
     if proxy is None:
-        with open('proxy.txt' , 'r') as f:
-            proxies = f.read().split('\n')
+        with open('proxy.json' , 'r') as f:
+            proxies = eval(f.read())
             proxy = random.choice(proxies)
-    [host , protocol] = proxy.split('@')
     #安装代理
-    if protocol == 'socks4':
-        [ip , port] = host.split(':')
-        socks.set_default_proxy(socks.SOCKS4 ,ip , int(port))
+    if proxy['protocol'] == 'socks4':
+        socks.set_default_proxy(socks.SOCKS4 ,proxy['ip'] , int(proxy['port']))
         socket.socket = socks.socksocket
-    elif protocol == 'socks5':
+    elif proxy['protocol'] == 'socks5':
         [ip , port] = host.split(':')
-        socks.set_default_proxy(socks.SOCKS5 ,ip , int(port))
+        socks.set_default_proxy(socks.SOCKS5 ,proxy['ip'] , int(proxy['port']))
         socket.socket = socks.socksocket
     else: 
-        proxy_support = urllib.request.ProxyHandler({protocol : host})
+        proxy_support = urllib.request.ProxyHandler({proxy['protocol'] : proxy['ip'] + ':' + proxy['port']})
         opener = urllib.request.build_opener(proxy_support)
         urllib.request.install_opener(opener)
-    return (protocol , host)
+    return (proxy['protocol'] , proxy['ip'] + ':' + proxy['port'])
