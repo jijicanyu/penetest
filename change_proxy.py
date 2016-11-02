@@ -11,16 +11,19 @@ def change_proxy(proxy = None):
         with open('proxy.json' , 'r') as f:
             proxies = eval(f.read())
             proxy = random.choice(proxies)
+
+    protocol = proxy['protocol'].lower()
+    ip = proxy['ip']
+    port = int(proxy['port'])
+
     #安装代理
-    if proxy['protocol'] == 'socks4':
-        socks.set_default_proxy(socks.SOCKS4 ,proxy['ip'] , int(proxy['port']))
+    if protocol in [ 'socks4' , 'socks5' ]:
+        socks.set_default_proxy(socks.SOCKS4 if protocol == 'socks4' else socks.SOCKS5 , ip , port)
         socket.socket = socks.socksocket
-    elif proxy['protocol'] == 'socks5':
-        [ip , port] = host.split(':')
-        socks.set_default_proxy(socks.SOCKS5 ,proxy['ip'] , int(proxy['port']))
-        socket.socket = socks.socksocket
-    else: 
-        proxy_support = urllib.request.ProxyHandler({proxy['protocol'] : proxy['ip'] + ':' + proxy['port']})
+    elif protocol in [ 'http' , 'https' ]: 
+        proxy_support = urllib.request.ProxyHandler({protocol : '%s:%d' % (ip , port)})
         opener = urllib.request.build_opener(proxy_support)
         urllib.request.install_opener(opener)
-    return (proxy['protocol'] , proxy['ip'] + ':' + proxy['port'])
+    else:
+        raise ValueError('Unknown proxy type %s about %s:%d' % (protocol , ip , port))
+    return (protocol , '%s:%d' % (ip , port))
